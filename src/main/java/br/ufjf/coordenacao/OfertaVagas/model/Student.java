@@ -5,6 +5,8 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.TreeSet;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 
 public class Student implements Comparable<Student>{
 
@@ -13,6 +15,7 @@ public class Student implements Comparable<Student>{
 	private String _nome;
 	private String _curriculum;
 	private TreeSet<Integer> _coursedSemesters;
+	private TreeSet<String> _IRA_skipClasses;
 	
 	public String getNome() {
 		return _nome;
@@ -40,6 +43,11 @@ public class Student implements Comparable<Student>{
 		this._coursedSemesters = new TreeSet<Integer>();
 	}
 	
+	public void setIRASkipClasses(TreeSet<String> skip)
+	{
+		this._IRA_skipClasses = skip;
+	}
+	
 	public float getIRA() { return IRA(0, 99999); }
 	public float getIRA(int semester) { return IRA(this._coursedSemesters.first(), semester); }
 	public float getSemesterIRA(int semester) { return IRA(semester, semester); }
@@ -53,6 +61,9 @@ public class Student implements Comparable<Student>{
 		cl = this.classes.get(ClassStatus.APPROVED);
 		if(cl != null) for(Class c: cl.keySet())
 		{
+			if(this._IRA_skipClasses.contains(c.getId()))
+				continue;
+			
 			String[] exceptions = {"APR", "DISP", "A", "B", "C", "D", "E"};
 			List<String> Exceptions = Arrays.asList(exceptions);
 			
@@ -76,6 +87,9 @@ public class Student implements Comparable<Student>{
 		cl = this.classes.get(ClassStatus.REPROVED_GRADE);
 		if(cl != null) for(Class c:cl.keySet())
 		{
+			if(this._IRA_skipClasses.contains(c.getId()))
+				continue;
+			
 			ArrayList<String[]> classdata = cl.get(c);
 			for(String[] s2: classdata)
 			{
@@ -95,6 +109,9 @@ public class Student implements Comparable<Student>{
 		cl = this.classes.get(ClassStatus.REPROVED_FREQUENCY);
 		if(cl != null) for(Class c: cl.keySet())
 		{	
+			if(this._IRA_skipClasses.contains(c.getId()))
+				continue;
+			
 			ArrayList<String[]> classdata = cl.get(c);
 			for(String[] s2: classdata)
 			{
@@ -107,9 +124,12 @@ public class Student implements Comparable<Student>{
 		}
 		
 		if(weight == 0)
-			return 0;
+			return new BigDecimal(0.0f).setScale(2, RoundingMode.HALF_EVEN).floatValue();
 		
-		return (float) grade / weight;
+		float ira = (float) grade / weight;
+		
+		return new BigDecimal(ira).setScale(2, RoundingMode.HALF_EVEN).floatValue();
+		
 	}
 	
 	public void addClass(String _class, String semester, ClassStatus status, String grade, String weight) {
