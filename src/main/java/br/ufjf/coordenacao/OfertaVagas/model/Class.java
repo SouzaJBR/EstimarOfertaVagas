@@ -48,11 +48,6 @@ public class Class implements Comparable<Class> {
 	@Override
 	public String toString() {
 		String o = id + "(" + workload + ")";
-		if (!prerequisite.isEmpty()) {
-			o += " -> [pre  ";
-			for (Class _class : prerequisite) o += _class +",";
-			o = o.substring(0,o.length()-1) + "]";
-		}
 		return o;
 	}
 
